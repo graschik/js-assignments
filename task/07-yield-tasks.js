@@ -44,7 +44,18 @@
  *
  */
 function* get99BottlesOfBeer() {
-    throw new Error('Not implemented');
+    let count = 99;
+    do{
+        yield count.toString() + " bottles of beer on the wall, " +  count.toString() + " bottles of beer.";
+        --count;
+        if (count != 1)
+            yield  "Take one down and pass it around, " +  count.toString() +  " bottles of beer on the wall.";
+    }while(count > 1);
+    yield "Take one down and pass it around, 1 bottle of beer on the wall.";
+    yield "1 bottle of beer on the wall, 1 bottle of beer.";
+    yield   "Take one down and pass it around, no more bottles of beer on the wall.";
+    yield "No more bottles of beer on the wall, no more bottles of beer.";
+    yield   "Go to the store and buy some more, 99 bottles of beer on the wall.";
 }
 
 
@@ -58,7 +69,17 @@ function* get99BottlesOfBeer() {
  *
  */
 function* getFibonacciSequence() {
-    throw new Error('Not implemented');
+    yield "0";
+    yield "1";
+    let first = 0;
+    let second = 1;
+    let temp;
+    do {
+        yield (first + second).toString();
+        temp = first;
+        first = second;
+        second = temp + second;
+    }while(1);
 }
 
 
@@ -93,8 +114,13 @@ function* getFibonacciSequence() {
  *
  */
 function* depthTraversalTree(root) {
-    throw new Error('Not implemented');
+    console.log(root.n.toString());
+    if ("children" in root)
+        //for (let i = 0; i < root.children.length; i++)
+             depthTraversalTree(root.children[0]);
+    return root;
 }
+
 
 
 /**
@@ -137,7 +163,7 @@ function* breadthTraversalTree(root) {
  *   [ 1, 3, 5, ... ], [ -1 ] => [ -1, 1, 3, 5, ...]
  */
 function* mergeSortedSequences(source1, source2) {
-    throw new Error('Not implemented');
+
 }
 
 
