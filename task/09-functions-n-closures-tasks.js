@@ -171,8 +171,13 @@ function logger(func, logFunc) {
         temp = temp.slice(1, temp.length - 1);
         temp = temp.replace(/\".\":/gi, "");
         myLogFunc(myFunc.name + "(" + temp+ ")" + " starts");
-        return myFunc(arguments);
-        myLogFunc(myFunc.name + "(" + temp + ")" + " end");
+        var qaz = myFunc;
+        if (arguments.length == 1)
+            var qaz =  myFunc(arguments[0]);
+        else
+            var qaz =  myFunc(arguments[0], arguments[1]);
+        myLogFunc(myFunc.name + "(" + temp + ")" + " ends");
+        return qaz;
     }
 }
 
@@ -190,7 +195,14 @@ function logger(func, logFunc) {
  *   partialUsingArguments(fn, 'a','b','c','d')() => 'abcd'
  */
 function partialUsingArguments(fn) {
-    throw new Error('Not implemented');
+    var arr_1 = [];
+    for (let i = 1; i < arguments.length; i++)
+        arr_1.push(arguments[i]);
+   return function () {
+       for (let i = 0; i < arguments.length; i++)
+           arr_1.push(arguments[i]);
+        return fn(arr_1[0], arr_1[1], arr_1[2], arr_1[3]);
+   }
 }
 
 
@@ -211,7 +223,10 @@ function partialUsingArguments(fn) {
  *   getId10() => 11
  */
 function getIdGeneratorFunction(startFrom) {
-    throw new Error('Not implemented');
+    var start = startFrom;
+    return function () {
+        return start++;
+    }
 }
 
 
