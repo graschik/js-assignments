@@ -113,12 +113,32 @@ function* getFibonacciSequence() {
  *  depthTraversalTree(node1) => node1, node2, node3, node4, node5, node6, node7, node8
  *
  */
-function* depthTraversalTree(root) {
-    console.log(root.n.toString());
+let dataDepthTree;
+let flagTraversalTree;
+let linkOnCurrNode;
+function* add(root, linkOnParantNode) {
+    dataDepthTree = root;
+    flagTraversalTree = 1;
     if ("children" in root)
-        //for (let i = 0; i < root.children.length; i++)
-             depthTraversalTree(root.children[0]);
-    return root;
+        for (let index = 0; index < root.children.length; ++index) {
+            linkOnCurrNode = add(root.children[index], linkOnCurrNode);
+            yield;
+        }
+    linkOnCurrNode = linkOnParantNode;
+}
+
+function* depthTraversalTree(root) {
+    let EndPer = function* () {yield "end"};
+    linkOnCurrNode = add(root, EndPer());
+    let a = linkOnCurrNode.next();
+    while (a.value != "end")
+    {
+        if(flagTraversalTree == 1){
+            yield dataDepthTree;
+            flagTraversalTree = 0;
+        }
+        a = linkOnCurrNode.next();
+    }
 }
 
 
@@ -144,9 +164,29 @@ function* depthTraversalTree(root) {
  *           8
  *
  */
-function* breadthTraversalTree(root) {
-    throw new Error('Not implemented');
+let arrNext = [];
+let arrCurr = [];
+function* BreadthTraversal(root) {
+    if ("children" in root)
+        for (let index = 0; index < root.children.length; ++index) {
+            arrNext.push(BreadthTraversal(root.children[index]));
+        }
+    yield root;
 }
+
+function* breadthTraversalTree(root) {
+    arrCurr.push(BreadthTraversal(root));
+    do{
+        for(let i = 0; i < arrCurr.length; i++)
+        {
+            let a = arrCurr[i].next();
+            yield a.value;
+        }
+        arrCurr = arrNext;
+        arrNext = [];
+    }while(arrCurr.length != 0)
+}
+
 
 
 /**
@@ -163,7 +203,25 @@ function* breadthTraversalTree(root) {
  *   [ 1, 3, 5, ... ], [ -1 ] => [ -1, 1, 3, 5, ...]
  */
 function* mergeSortedSequences(source1, source2) {
-
+    let iter1 = source1();
+    let iter2 = source2();
+    let item1 = iter1.next();
+    let item2 = iter2.next();
+    while(!item1.done)
+    {
+        while (!item2.done && item2.value < item1.value )
+        {
+            yield item2.value;
+            item2 = iter2.next();
+        }
+        yield item1.value;
+        item1 = iter1.next();
+    }
+    while (!item2.done)
+    {
+        yield item2.value;
+        item2 = iter2.next();
+    }
 }
 
 

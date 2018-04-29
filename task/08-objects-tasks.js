@@ -59,10 +59,7 @@ function getJSON(obj) {
  *
  */
 function fromJSON(proto, json) {
-    var qw =  JSON.parse(json, function (key, value) {
-        if (key in proto )return new Object(value);
-    });
-    return qw;
+    return Object.setPrototypeOf(JSON.parse(json), proto);
 }
 
 
@@ -116,36 +113,153 @@ function fromJSON(proto, json) {
  *  Если нужно больше примеров - можете посмотреть юнит тесты.
  */
 
+function makeClone(obj) {
+    let clone = {}; // Создаем новый пустой объект
+    for (let prop in obj) { // Перебираем все свойства копируемого объекта
+        if (obj.hasOwnProperty(prop)) { // Только собственные свойства
+            if ("object"===typeof obj[prop]) // Если свойство так же объект
+                clone[prop] = makeClone(obj[prop]); // Делаем клон свойства
+            else
+                clone[prop] = obj[prop]; // Или же просто копируем значение
+        }
+    }
+    return clone;
+}
+
+function init(obj, flag)
+{
+    if (obj.elementSt === undefined || flag)
+        obj.elementSt = "";
+    if (obj.idSt === undefined || flag)
+        obj.idSt = "";
+    if (obj.classSt === undefined || flag)
+        obj.classSt = "";
+    if (obj.attrSt === undefined || flag)
+        obj.attrSt = "";
+    if (obj.pseudoClassSt === undefined || flag)
+        obj.pseudoClassSt = "";
+    if (obj.pseudoElementSt === undefined || flag)
+        obj.pseudoElementSt = "";
+}
+
 const cssSelectorBuilder = {
 
     element: function(value) {
-        throw new Error('Not implemented');
+        this.stringify = function ()
+        {
+            value = this.elementSt + this.idSt + this.classSt + this.attrSt + this.pseudoClassSt + this.pseudoElementSt;
+            init(this, 1);
+            return value;
+        }
+        init(this, 0);
+        let add = makeClone(this);
+        if (!(add.idSt == "" &&  add.classSt == "" &&  add.attrSt == "" &&  add.pseudoClassSt == "" &&  add.pseudoElementSt== "") && value != "")
+            throw new Error("Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element");
+        if (add.elementSt != "" && value != "")
+            throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+        if (value != "")
+            add.elementSt = value;
+        return add;
     },
 
     id: function(value) {
-        throw new Error('Not implemented');
+        this.stringify = function ()
+        {
+            value = this.elementSt + this.idSt + this.classSt + this.attrSt + this.pseudoClassSt + this.pseudoElementSt;
+            init(this, 1);
+            return value;
+        }
+        init(this, 0);
+        let add = makeClone(this);
+        if (!(add.classSt == "" &&  add.attrSt == "" &&  add.pseudoClassSt == "" &&  add.pseudoElementSt == ""))
+            throw new Error("Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element");
+        if (add.idSt != "")
+            throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+        add.idSt = add.idSt + "#" + value;
+        return add;
     },
 
     class: function(value) {
-        throw new Error('Not implemented');
+        this.stringify = function ()
+        {
+
+            value = this.elementSt + this.idSt + this.classSt + this.attrSt + this.pseudoClassSt + this.pseudoElementSt;
+            init(this, 1);
+            return value;
+        }
+        init(this, 0);
+        let add = makeClone(this);
+        if (!(add.attrSt == "" &&  add.pseudoClassSt=== "" &&  add.pseudoElementSt == ""))
+            throw new Error("Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element");
+        add.classSt = add.classSt + "." + value;
+        return add;
     },
 
     attr: function(value) {
-        throw new Error('Not implemented');
+        this.stringify = function ()
+        {
+
+            value = this.elementSt + this.idSt + this.classSt + this.attrSt + this.pseudoClassSt + this.pseudoElementSt;
+            init(this, 1);
+            return value;
+        }
+        init(this, 0);
+        let add = makeClone(this);
+        if (!(add.pseudoClassSt == "" &&  add.pseudoElementSt == ""))
+            throw new Error("Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element");
+        add.attrSt = "[" + value + "]";
+        return add;
     },
 
     pseudoClass: function(value) {
-        throw new Error('Not implemented');
+        this.stringify = function ()
+        {
+
+            value = this.elementSt + this.idSt + this.classSt + this.attrSt + this.pseudoClassSt + this.pseudoElementSt;
+            init(this, 1);
+            return value;
+        }
+        init(this, 0);
+        let add = makeClone(this);
+        if (!(add.pseudoElementSt == ""))
+            throw new Error("Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element");
+        add.pseudoClassSt = add.pseudoClassSt + ":" + value;
+        return add;
     },
 
     pseudoElement: function(value) {
-        throw new Error('Not implemented');
+        this.stringify = function ()
+        {
+            value = this.elementSt + this.idSt + this.classSt + this.attrSt + this.pseudoClassSt + this.pseudoElementSt;
+            init(this, 1);
+            return value;
+        }
+        init(this, 0);
+        let add = makeClone(this);
+        if (add.pseudoElementSt != "")
+            throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+        add.pseudoElementSt = "::" + value;
+        return add;
     },
 
     combine: function(selector1, combinator, selector2) {
-        throw new Error('Not implemented');
-    },
-};
+        this.stringify = function ()
+        {
+            return this.value;
+        }
+        let add = makeClone(this);
+        if (selector1.value === undefined)
+            add.sel1 = selector1.element("").stringify()
+        else
+            add.sel1 = selector1.value;
+        if (selector2.value === undefined)
+            add.sel2 = selector2.element("").stringify()
+        else
+            add.sel2 = selector2.value;
+        add.value = add.sel1+ " " + combinator + " " + add.sel2;
+        return add;
+    }
+}
 
 
 module.exports = {
